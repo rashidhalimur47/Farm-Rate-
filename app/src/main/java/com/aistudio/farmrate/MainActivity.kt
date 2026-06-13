@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
@@ -27,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -417,22 +420,31 @@ fun FarmRateApp() {
             }
         }
     }
-    Crossfade(targetState = true, label = "ScreenTransition") { _ ->
-        when {
-            showSplash -> SplashScreen()
-            showOnboarding -> OnboardingScreen {
+    val appScreen = when {
+        showSplash -> "splash"
+        showOnboarding -> "onboarding"
+        selectedCommodityForDetail != null -> "detail"
+        else -> "main"
+    }
+
+    Crossfade(targetState = appScreen, label = "ScreenTransition") { screen ->
+        when (screen) {
+            "splash" -> SplashScreen()
+            "onboarding" -> OnboardingScreen {
                 showOnboarding = false
                 savePreferences()
             }
-            selectedCommodityForDetail != null -> {
-                CommodityDetailScreen(
-                    commodity = selectedCommodityForDetail!!,
-                    t = t,
-                    appLanguage = appLanguage,
-                    onBack = { selectedCommodityForDetail = null }
-                )
+            "detail" -> {
+                selectedCommodityForDetail?.let {
+                    CommodityDetailScreen(
+                        commodity = it,
+                        t = t,
+                        appLanguage = appLanguage,
+                        onBack = { selectedCommodityForDetail = null }
+                    )
+                }
             }
-            else -> {
+            "main" -> {
                 Scaffold(
                     bottomBar = {
                         NavigationBar(
@@ -534,16 +546,15 @@ fun SplashScreen() {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(
                 modifier = Modifier
-                    .size(90.dp)
-                    .clip(RoundedCornerShape(20.dp))
+                    .size(120.dp)
+                    .clip(RoundedCornerShape(24.dp))
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Agriculture,
+                Image(
+                    painter = painterResource(id = R.drawable.img_app_icon_1781327275386),
                     contentDescription = "FarmRate Logo",
-                    tint = PrimaryGreen,
-                    modifier = Modifier.size(54.dp)
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             Spacer(modifier = Modifier.height(18.dp))
@@ -580,7 +591,7 @@ fun OnboardingScreen(onStart: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                imageVector = Icons.Default.TrendingUp,
+                imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                 contentDescription = null,
                 tint = PrimaryGreen,
                 modifier = Modifier.size(90.dp)
@@ -749,7 +760,7 @@ fun HomeScreen(
                         }
 
                         Spacer(modifier = Modifier.height(14.dp))
-                        Divider(color = BorderColor)
+                        HorizontalDivider(color = BorderColor)
                         Spacer(modifier = Modifier.height(2.dp))
 
                         Row(
@@ -943,7 +954,7 @@ fun CommodityDetailScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
             }
             Text(
                 text = t("details_title"),
@@ -993,7 +1004,7 @@ fun CommodityDetailScreen(
                         Text(t("modal_price"), fontSize = 13.sp, color = TextSecondary)
 
                         Spacer(modifier = Modifier.height(14.dp))
-                        Divider(color = BorderColor)
+                        HorizontalDivider(color = BorderColor)
                         Spacer(modifier = Modifier.height(14.dp))
 
                         Row(modifier = Modifier.fillMaxWidth()) {
@@ -1030,17 +1041,17 @@ fun CommodityDetailScreen(
                             Text(t("mandi"), fontWeight = FontWeight.Bold, color = TextSecondary)
                             Text(getLocalizedLocationName(commodity.market, appLanguage), fontWeight = FontWeight.Bold, color = TextPrimary)
                         }
-                        Divider(color = BorderColor)
+                        HorizontalDivider(color = BorderColor)
                         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(t("district"), fontWeight = FontWeight.Bold, color = TextSecondary)
                             Text(getLocalizedLocationName(commodity.district, appLanguage), fontWeight = FontWeight.Bold, color = TextPrimary)
                         }
-                        Divider(color = BorderColor)
+                        HorizontalDivider(color = BorderColor)
                         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(t("state"), fontWeight = FontWeight.Bold, color = TextSecondary)
                             Text(getLocalizedLocationName(commodity.state, appLanguage), fontWeight = FontWeight.Bold, color = TextPrimary)
                         }
-                        Divider(color = BorderColor)
+                        HorizontalDivider(color = BorderColor)
                         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(t("arrival_date"), fontWeight = FontWeight.Bold, color = TextSecondary)
                             Text(commodity.arrivalDate, fontWeight = FontWeight.Bold, color = TextPrimary)
@@ -1339,7 +1350,7 @@ fun SettingsScreen(
                             }
 
                             Spacer(modifier = Modifier.height(20.dp))
-                            Divider(color = BorderColor)
+                            HorizontalDivider(color = BorderColor)
                             Spacer(modifier = Modifier.height(12.dp))
 
                             Text(
